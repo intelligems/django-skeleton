@@ -168,3 +168,18 @@ if DEBUG:
     CORS_ORIGIN_ALLOW_ALL = True
 
 AUTH_USER_MODEL = 'users.Account'
+
+if os.getenv('MEMCACHED_URL'):
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': os.getenv('MEMCACHED_URL'),
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake',
+        }
+    }
