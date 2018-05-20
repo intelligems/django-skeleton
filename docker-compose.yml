@@ -27,12 +27,34 @@ services:
       DATABASE_URL: postgis://user:pass@postgres/db
       ALLOWED_HOSTS: ${STOLOS_PUBLIC_URL}
       PORT: 8000
+      REDIS_URL: redis
+      MEMCACHED_URL: memcached
     ports:
       - 8000
     volumes:
       - ${STOLOS_REMOTE_DIR}./:/usr/src/app
+    links:
+      - redis
+      - memcached
+      - postgres
+    depends_on:
+      - redis
+      - postgres
+      - memcached
 
-
+  worker:
+    build: ./
+    command: celery -A {{ project_name }} worker -l info
+    environment:
+      DATABASE_URL: postgis://user:pass@postgres/db
+      ALLOWED_HOSTS: ${STOLOS_PUBLIC_URL}
+      REDIS_URL: redis
+      MEMCACHED_URL: memcached
+    links:
+      - redis
+    depends_on:
+      - redis
+      - postgres
 
 volumes:
   postgres_data:

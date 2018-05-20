@@ -229,3 +229,7 @@ LOGGING = {
         }
     }
 }
+
+REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
+CELERY_BROKER_URL = f'{REDIS_URL}/0'
+CELERY_RESULT_BACKEND = f'{REDIS_URL}/1'

@@ -7,6 +7,7 @@ This is a project template, which means no naming conventions apply in the proje
 There are some pre-loaded 3rd-party libraries which we have found are very common in all our applications.
 
 3rd-party apps it includes:
+- `celery`, for background jobs processing
 - `django-storages`, to store files in AWS S3 (the most commonly used object storage)
 - `django-anymail`, for transactional emails
 - `djangorestframework`, for your RESTful API
@@ -35,5 +36,11 @@ After that just keep doing the configuration you use as a standard in your Djang
 
 # Docker and Heroku support
 There is built-in docker support. We have added the `Dockerfile` and `docker-compose.yml` file that suits our working set, which of course you may feel free to change and adapt as per your requirements.
+As you will see, by default our `docker-compose.yml` files is confgured to be working with [Stolos.io](https://stolos.io), which is our preferred staging environment provider.
 
 Also, you will find a `Procfile` inside, with just the basic config required to get your project running on Heroku asap.
+
+# Roadmap
+- Include common error reporting tools (eg. Sentry)
+- Add Heroku deploy button for instant deployments
+- Any ideas? You can contribute!
