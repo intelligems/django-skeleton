@@ -24,7 +24,7 @@ services:
     build: ./
     command: python manage.py runserver 0.0.0.0:8000
     environment:
-      DATABASE_URL: postgis://user:pass@postgres/db
+      DATABASE_URL: postgres://user:pass@postgres/db
       ALLOWED_HOSTS: ${STOLOS_PUBLIC_URL}
       PORT: 8000
       REDIS_URL: redis
