@@ -18,7 +18,7 @@ There are some pre-loaded 3rd-party libraries which we have found are very commo
 - `django-environ`, following the 12-factor methodology
 
 # Prerequisites
-- Python3
+- Python3 (Python 3.7 not working yet)
 - Git
 - pip
 - virtualenv (recommended)
