@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRETS_DIR = os.path.abspath(os.path.join(os.path.sep, 'run', 'secrets'))
 ALL_SECRETS = os.path.join(SECRETS_DIR, '*')
 
-SWARM_MODE = os.getenv('SWARM_MODE', True)
+SWARM_MODE = os.getenv('SWARM_MODE', False)
 
 if SWARM_MODE:
     # Export variables from secrets
