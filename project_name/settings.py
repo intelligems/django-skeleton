@@ -13,12 +13,27 @@ https://docs.djangoproject.com/en/{{ docs_version }}/ref/settings/
 import os
 import dj_database_url
 import email.utils
+from glob import glob
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/{{ docs_version }}/howto/deployment/checklist/
+
+SECRETS_DIR = os.path.abspath(os.path.join(os.path.sep, 'run', 'secrets'))
+ALL_SECRETS = os.path.join(SECRETS_DIR, '*')
+
+SWARM_MODE = os.getenv('SWARM_MODE', True)
+
+if SWARM_MODE:
+    # Export variables from secrets
+    for secret in glob(ALL_SECRETS):
+        secret_key=secret.split('/')[-1].upper()
+        with open(secret) as secret_file:
+            secret_value = secret_file.read().rstrip('\n')
+            os.environ[secret_key] = secret_value
+
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'z9($i(5-)ofq(2)ju7d0xdapc8xj9$#-ptjfc+y+u4a5!&n@*v')
