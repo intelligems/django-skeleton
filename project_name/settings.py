@@ -14,6 +14,7 @@ import os
 import dj_database_url
 import email.utils
 from glob import glob
+import raven
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -66,6 +67,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'django_filters',
     'guardian',
+    'raven.contrib.django.raven_compat',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
@@ -199,6 +201,11 @@ else:
         }
     }
 
+RAVEN_CONFIG = {
+    'dsn': os.getenv('SENTRY_DSN', ''),
+    'release': os.getenv('DRONE_COMMIT_SHORT', '')  # we are using DroneCI
+}
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -225,23 +232,24 @@ LOGGING = {
         'mail_admins': {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',
-        }
+        },
+        'sentry': {
+            'level': 'ERROR',
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+            'formatter': 'verbose'
+        },
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', 'sentry'],
+            'level': os.getenv('LOGGING_LEVEL', 'INFO'),
             'propagate': True,
         },
         'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
+            'handlers': ['mail_admins', 'console', 'sentry'],
+            'level': os.getenv('LOGGING_LEVEL', 'INFO'),
             'propagate': False,
         },
-        '{{ project_name }}.custom': {
-            'handlers': ['console', 'mail_admins'],
-            'level': 'INFO',
-            'filters': ['special']
-        }
     }
 }
 
