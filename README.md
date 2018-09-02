@@ -41,6 +41,5 @@ As you will see, by default our `docker-compose.yml` files is confgured to be wo
 Also, you will find a `Procfile` inside, with just the basic config required to get your project running on Heroku asap.
 
 # Roadmap
-- Include common error reporting tools (eg. Sentry)
 - Add Heroku deploy button for instant deployments
 - Any ideas? You can contribute!
