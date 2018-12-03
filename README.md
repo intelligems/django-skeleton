@@ -24,11 +24,11 @@ There are some pre-loaded 3rd-party libraries which we have found are very commo
 - virtualenv (recommended)
 
 # How to use
-To start a new rojectp with this template, it's really simple:
+To start a new project with this template, it's really simple:
 ```bash
 django-admin.py startproject \
   --template=https://github.com/intelligems/django-skeleton/zipball/master \
-  --extension=py,rst,yml \
+  --extension=py,rst,yml,sh \
   --name=Procfile \
   <project_name>
 ```

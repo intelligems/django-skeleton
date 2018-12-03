@@ -2,6 +2,7 @@
 
 set -xe
 
+# Settings check to fail explicitly on wrong configuration.
 ./manage.py check --deploy --settings={{ project_name }}.settings --fail-level ERROR
 
 if [[ "$RUN_MIGRATIONS" == "1" ]]; then

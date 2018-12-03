@@ -344,7 +344,7 @@ def check_settings(app_configs, **kwargs):
         error_counter += 1
         warning_counter += 1
 
-    # Special cases
+    # DRONE_COMMIT_SHORT is passed as env variable from ci automation. It is used to track logging in Sentry.
     if config('DRONE_COMMIT_SHORT', default=None) is None:
         messages.append(
             Warning(
