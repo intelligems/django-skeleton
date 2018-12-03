@@ -1,0 +1,8 @@
+.git
+*.png
+db.sqlite3
+swarm/
+.drone.yml
+.stolos.yml
+docker-compose.yml
+Procfile
