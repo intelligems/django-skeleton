@@ -48,6 +48,10 @@ services:
       dockerfile: Dockerfile
       target: EXPERIMENTAL
     command: python manage.py runserver 0.0.0.0:8000
+#    For debug uncomment below
+#    command: python manage.py runserver 0.0.0.0:8000 --pdb
+#    stdin_open: true
+#    tty: true
     << : *common-config
     environment:
       << : *common-environment
