@@ -2,49 +2,34 @@ version: '3.4'
 
 x-common-config:
   &common-config
-  image: "{{ project_name }}:local"
+  image: "{{ project_name }}:${STOLOS_PUBLIC_URL}"
+  env_file:
+    - environments/stolos.env
   volumes:
-    - ./{{ project_name }}:/usr/src/app/{{ project_name }}
-    - ./users:/usr/src/app/users
-  depends_on:
-    - redis
-    - postgres
-    - memcached
+    - ${STOLOS_REMOTE_DIR}/{{ project_name }}:/usr/src/app/{{ project_name }}
+    - ${STOLOS_REMOTE_DIR}/users:/usr/src/app/users
+  networks:
+    - intelligems-central
 
 x-common-environment:
   &common-environment
   SWARM_MODE: "False"
   DEBUG: "True"
   DATABASE_URL: ${DATABASE_URL}
-  ALLOWED_HOSTS: "*"
-  REDIS_URL: redis://redis:6379
-  MEMCACHED_URL: memcached://memcached
+  ALLOWED_HOSTS: ${STOLOS_PUBLIC_URL}
+  REDIS_URL: redis://redis-central:6379
+  MEMCACHED_URL: memcached://memcached-central
   LOGGING_LEVEL: INFO
 
-
-volumes:
-  postgres_data: {}
+networks:
+  intelligems-central:
+    external:
+      name: intelligems-central
 
 services:
-
-  postgres:
-    image: postgres:10
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: {{ project_name }}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  redis:
-    image: redis:4
-
-  memcached:
-    image: memcached:alpine
-
   web:
     build:
-      context: .
+      context: ./
       dockerfile: Dockerfile
       target: EXPERIMENTAL
     command: python manage.py runserver 0.0.0.0:8000
@@ -57,7 +42,7 @@ services:
       << : *common-environment
       RUN_MIGRATIONS: "1"
     ports:
-      - 8000:8000
+      - 8000
 
   worker:
     command: celery -A {{ project_name }} worker -l info
@@ -66,6 +51,8 @@ services:
       << : *common-environment
       RUN_MIGRATIONS: "0"
       C_FORCE_ROOT: "true"
+    depends_on:
+      - web
 
   beat:
     command: celery -A {{ project_name }} beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
@@ -74,6 +61,8 @@ services:
       << : *common-environment
       RUN_MIGRATIONS: "0"
       C_FORCE_ROOT: "true"
+    depends_on:
+      - web
 
   flower:
     command: celery flower -A {{ project_name }} -l info --address=0.0.0.0 --port=5555 --persistent
@@ -82,7 +71,7 @@ services:
       << : *common-environment
       RUN_MIGRATIONS: "0"
       C_FORCE_ROOT: "true"
+    depends_on:
+      - web
     ports:
-    - 5555:5555
-
-
+      - 5555
