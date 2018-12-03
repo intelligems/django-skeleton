@@ -13,9 +13,16 @@ https://docs.djangoproject.com/en/{{ docs_version }}/ref/settings/
 import os
 import dj_database_url
 import email.utils
+import ipaddress
 from glob import glob
+
+from decouple import config
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from django.core.checks import Error, Warning, register
+from django.conf import settings
+
+from .check_utils import expected_settings
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,7 +33,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRETS_DIR = os.path.abspath(os.path.join(os.path.sep, 'run', 'secrets'))
 ALL_SECRETS = os.path.join(SECRETS_DIR, '*')
 
-SWARM_MODE = os.getenv('SWARM_MODE', False)
+SWARM_MODE = config('SWARM_MODE', cast=bool, default=False)
 
 if SWARM_MODE:
     # Export variables from secrets
@@ -37,18 +44,28 @@ if SWARM_MODE:
             os.environ[secret_key] = secret_value
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'z9($i(5-)ofq(2)ju7d0xdapc8xj9$#-ptjfc+y+u4a5!&n@*v')
+SECRET_KEY = config('SECRET_KEY', default='z9($i(5-)ofq(2)ju7d0xdapc8xj9$#-ptjfc+y+u4a5!&n@*v')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('PROD') != '1'
+DEBUG = config('DEBUG', cast=bool, default=True)
 
 ADMINS = []
-if os.getenv('ADMINS'):
-    ADMINS = email.utils.getaddresses(os.getenv('ADMINS').split(','))
+if config('ADMINS', default=None):
+    ADMINS = email.utils.getaddresses(config('ADMINS', default=None).split(','))
 
-ALLOWED_HOSTS = []
-if os.getenv('ALLOWED_HOSTS'):
-    ALLOWED_HOSTS.extend(os.getenv('ALLOWED_HOSTS').split(','))
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.ngrok.io']
+
+# Calculate list of ip addresses from CIDR
+if config('ALLOWED_CIDR', default=None):
+    networks = config('ALLOWED_CIDR', default=None).split(',')
+
+    allowed_ips = []
+    for network in networks:
+        allowed_ips.extend([str(ip) for ip in ipaddress.ip_network(network)])
+    ALLOWED_HOSTS.extend(allowed_ips)
+
+if config('ALLOWED_HOSTS', default=None):
+    ALLOWED_HOSTS.extend(config('ALLOWED_HOSTS', default=None).split(','))
 
 # Application definition
 
@@ -110,12 +127,12 @@ WSGI_APPLICATION = '{{ project_name }}.wsgi.application'
 # https://docs.djangoproject.com/en/{{ docs_version }}/ref/settings/#databases
 
 
-DATABASE_URL = os.getenv('DATABASE_URL', None)
+DATABASE_URL = config('DATABASE_URL', default=None)
 if DATABASE_URL is None:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': '{{ project_name }}',
         }
     }
 else:
@@ -146,7 +163,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Europe/Stockholm'
+TIME_ZONE = config('TIME_ZONE', default='GMT')
 
 USE_I18N = True
 
@@ -158,6 +175,26 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/{{ docs_version }}/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = 'staticfiles'
+
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default=None)
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default=None)
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default=None)
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+AWS_QUERYSTRING_AUTH = True  # signed URLs to avoid static files misuse
+AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')
+if not DEBUG:
+    AWS_S3_ENCRYPTION = True
+
+if not DEBUG:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    AWS_S3_CUSTOM_DOMAIN = config('AWS_S3_CUSTOM_DOMAIN', default=None)
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = 'media'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -185,11 +222,12 @@ if DEBUG:
 
 AUTH_USER_MODEL = 'users.Account'
 
-if os.getenv('MEMCACHED_URL'):
+MEMCACHED_HOST = config('MEMCACHED_HOST', default=None)
+if MEMCACHED_HOST:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-            'LOCATION': os.getenv('MEMCACHED_URL'),
+            'LOCATION': '{}:11211'.format(MEMCACHED_HOST),
         }
     }
 else:
@@ -201,10 +239,11 @@ else:
     }
 
 sentry_sdk.init(
-    dsn=os.getenv('SENTRY_DSN', ''),
+    dsn=config('SENTRY_DSN', default=''),
     integrations=[DjangoIntegration()],
-    release=os.getenv('DRONE_COMMIT_SHORT', ''),
-    send_default_pii=True
+    release=config('DRONE_COMMIT_SHORT', default=''),
+    send_default_pii=True,
+    request_bodies='always'
 )
 
 LOGGING = {
@@ -238,17 +277,81 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': os.getenv('LOGGING_LEVEL', 'INFO'),
+            'level': config('LOGGING_LEVEL', default='INFO'),
             'propagate': True,
         },
         'django.request': {
             'handlers': ['mail_admins', 'console'],
-            'level': os.getenv('LOGGING_LEVEL', 'INFO'),
+            'level': config('LOGGING_LEVEL', default='INFO'),
             'propagate': False,
         },
     }
 }
 
-REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
+REDIS_URL = config('REDIS_URL', default='redis://localhost:6379')
 CELERY_BROKER_URL = f'{REDIS_URL}/0'
 CELERY_RESULT_BACKEND = f'{REDIS_URL}/1'
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+ENVIRONMENT_CHECKS = config('ENVIRONMENT_CHECKS', default='develop')
+
+
+@register(deploy=True)
+def check_settings(app_configs, **kwargs):
+    messages = []
+    all_values = expected_settings(settings)
+    environment = settings.ENVIRONMENT_CHECKS
+
+    current = all_values.current
+    expected = all_values.develop
+    if environment == 'staging':
+        expected = all_values.staging
+    elif environment == 'production':
+        expected = all_values.production
+
+    error_counter = 1
+    warning_counter = 1
+
+    for key, value in expected.items():
+        if config(key, default=None) is None:
+            messages.append(
+                Warning(
+                    f'Environment variable: {key} is None. Default value set: {current.get(key)}',
+                    hint=f'Update environment variable: {key}={expected.get(key)} for environment: {environment}',
+                    obj=settings,
+                    id=f'settings.W{str(warning_counter).zfill(3)}'
+                )
+            )
+        if current.get(key) is None:
+            messages.append(
+                Warning(
+                    f'Current {key}: {current.get(key)} is None',
+                    hint=f'Provide a value for {key}',
+                    obj=settings,
+                    id=f'settings.W{str(warning_counter).zfill(3)}'
+                )
+            )
+        if current.get(key) != expected.get(key):
+            messages.append(
+                Error(
+                    f'Current {key}: {current.get(key)} is different from expected: {expected.get(key)} for environment: {environment}',
+                    hint=f'Update value for {key}={expected.get(key)} for environment: {environment}',
+                    obj=settings,
+                    id=f'settings.E{str(error_counter).zfill(3)}'
+                )
+            )
+        error_counter += 1
+        warning_counter += 1
+
+    # Special cases
+    if config('DRONE_COMMIT_SHORT', default=None) is None:
+        messages.append(
+            Warning(
+                f'Environment variable: DRONE_COMMIT_SHORT is None. Default value set: \'\'',
+                hint=f'Update environment variable: DRONE_COMMIT_SHORT for environment: {environment}',
+                obj=settings,
+                id=f'settings.W{str(warning_counter+1).zfill(3)}'
+            )
+        )
+    return messages
