@@ -53,10 +53,10 @@ services:
       << : *common-environment
       RUN_MIGRATIONS: "1"
     ports:
-      - '8000:8000'
+      - 8000:8000
 
   worker:
-    command: celery -A thor_backend worker -l info
+    command: celery -A {{ project_name }} worker -l info
     << : *common-config
     environment:
       << : *common-environment
@@ -64,11 +64,21 @@ services:
       C_FORCE_ROOT: "true"
 
   beat:
-    command: celery -A thor_backend beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: celery -A {{ project_name }} beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     << : *common-config
     environment:
       << : *common-environment
       RUN_MIGRATIONS: "0"
       C_FORCE_ROOT: "true"
+
+  flower:
+    command: celery flower -A {{ project_name }} -l info --address=0.0.0.0 --port=5555 --persistent
+    << : *common-config
+    environment:
+      << : *common-environment
+      RUN_MIGRATIONS: "0"
+      C_FORCE_ROOT: "true"
+    ports:
+    - 5555:5555
 
 

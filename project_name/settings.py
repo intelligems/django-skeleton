@@ -70,6 +70,7 @@ if config('ALLOWED_HOSTS', default=None):
 # Application definition
 
 INSTALLED_APPS = [
+    'django_pdb',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -81,6 +82,7 @@ INSTALLED_APPS = [
 
     'anymail',
     'corsheaders',
+    'django_celery_beat',
     'django_extensions',
     'django_filters',
     'guardian',
@@ -88,6 +90,12 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'storages',
+
+    # Health checks
+    'health_check',
+    'health_check.db',
+    'health_check.cache',
+    'health_check.contrib.celery',
 
 ]
 
