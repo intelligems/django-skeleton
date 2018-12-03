@@ -1,4 +1,4 @@
-FROM python:3.6-slim as LTS
+FROM python:3.6-slim
 LABEL maintainer="dritsas@intelligems.eu"
 
 ENV PYTHONUNBUFFERED=1
