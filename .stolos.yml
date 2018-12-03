@@ -18,7 +18,7 @@ x-common-environment:
   DATABASE_URL: ${DATABASE_URL}
   ALLOWED_HOSTS: ${STOLOS_PUBLIC_URL}
   REDIS_URL: redis://redis-central:6379
-  MEMCACHED_URL: memcached://memcached-central
+  MEMCACHED_URL: memcached-central
   LOGGING_LEVEL: INFO
 
 networks:

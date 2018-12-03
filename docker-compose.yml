@@ -18,7 +18,7 @@ x-common-environment:
   DATABASE_URL: ${DATABASE_URL}
   ALLOWED_HOSTS: "*"
   REDIS_URL: redis://redis:6379
-  MEMCACHED_URL: memcached://memcached
+  MEMCACHED_URL: memcached
   LOGGING_LEVEL: INFO
 
 
