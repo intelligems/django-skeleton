@@ -408,9 +408,9 @@ pipeline:
       event: push
 
 
-  ####################################################
-  # Docker Stack deploy for all thor services devel  #
-  ####################################################
+  ######################################################
+  # Docker Stack deploy for all thor services develop  #
+  ######################################################
   scp-environment-develop:
     image: appleboy/drone-scp
     host: staging_ip_machine_1
