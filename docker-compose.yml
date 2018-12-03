@@ -1,61 +1,74 @@
-version: '2.0'
+version: '3.4'
+
+x-common-config:
+  &common-config
+  image: "{{ project_name }}:local"
+  volumes:
+    - ./{{ project_name }}:/usr/src/app/{{ project_name }}
+    - ./users:/usr/src/app/users
+  depends_on:
+    - redis
+    - postgres
+    - memcached
+
+x-common-environment:
+  &common-environment
+  DEBUG: "True"
+  DATABASE_URL: ${DATABASE_URL}
+  ALLOWED_HOSTS: "*"
+  RUN_MIGRATIONS: "0"
+  REDIS_URL: redis://redis:6379
+  MEMCACHED_URL: memcached://memcached
+  LOGGING_LEVEL: INFO
+
+
+volumes:
+  postgres_data: {}
 
 services:
+
   postgres:
-    image: postgres:alpine
+    image: postgres:10
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: {{ project_name }}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_PASSWORD: pass
-      POSTGRES_USER: user
-      POSTGRES_DB: db
+
+  redis:
+    image: redis:4
 
   memcached:
     image: memcached:alpine
-    ports:
-      - 11211
-
-  redis:
-    image: redis:alpine
-    ports:
-      - 6379
 
   web:
-    build: ./
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: EXPERIMENTAL
     command: python manage.py runserver 0.0.0.0:8000
+    << : *common-config
     environment:
-      DATABASE_URL: postgres://user:pass@postgres/db
-      ALLOWED_HOSTS: ${STOLOS_PUBLIC_URL}
-      PORT: 8000
-      REDIS_URL: redis
-      MEMCACHED_URL: memcached
+      << : *common-environment
+      RUN_MIGRATIONS: "1"
     ports:
-      - 8000
-    volumes:
-      - ${STOLOS_REMOTE_DIR}./:/usr/src/app
-    links:
-      - redis
-      - memcached
-      - postgres
-    depends_on:
-      - redis
-      - postgres
-      - memcached
+      - '8000:8000'
 
   worker:
-    build: ./
-    command: celery -A {{ project_name }} worker -l info
+    command: celery -A thor_backend worker -l info
+    << : *common-config
     environment:
-      DATABASE_URL: postgis://user:pass@postgres/db
-      ALLOWED_HOSTS: ${STOLOS_PUBLIC_URL}
-      REDIS_URL: redis
-      MEMCACHED_URL: memcached
-    links:
-      - redis
-    depends_on:
-      - redis
-      - postgres
+      << : *common-environment
+      RUN_MIGRATIONS: "0"
+      C_FORCE_ROOT: "true"
 
-volumes:
-  postgres_data:
-  app:
+  beat:
+    command: celery -A thor_backend beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    << : *common-config
+    environment:
+      << : *common-environment
+      RUN_MIGRATIONS: "0"
+      C_FORCE_ROOT: "true"
+
+
