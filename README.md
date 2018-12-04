@@ -74,6 +74,8 @@ chmod +x bootstrap.sh
 ./bootstrap.sh
 ```
 
+> __Warning__ any subsequent call to `bootstrap.sh` or `python -m config_templates.chartmap` will ovewrite auto-generated .yml files from earlier runs.
+
 # Docker and Heroku support
 There is built-in docker support. We have added the `Dockerfile` and `docker-compose.yml` file that suits our working set, which of course you may feel free to change and adapt as per your requirements.
 As you will see, by default our `docker-compose.yml` files is confgured to be working with [Stolos.io](https://stolos.io), which is our preferred staging environment provider.
