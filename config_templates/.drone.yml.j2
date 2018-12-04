@@ -120,7 +120,7 @@ pipeline:
         --restart-max-attempts 2
         --update-failure-action rollback
         --image {{ staging_repo_url }}/{{ project_name }}:${DRONE_COMMIT:0:8}
-        {{project_name}}_worker
+        {{ project_name }}_worker
     when:
       branch: develop
       event: push
