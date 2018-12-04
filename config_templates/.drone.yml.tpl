@@ -75,7 +75,7 @@ pipeline:
   deploy_web_develop:
     group: deploy-service-develop
     image: appleboy/drone-ssh
-    host: {{ staging_ip_instances[0] }}
+    host: {{ staging_ip_instances.0 }}
     port: 22
     command_timeout: 360
     secrets:
@@ -102,7 +102,7 @@ pipeline:
   deploy_worker_develop:
     group: deploy-service-develop
     image: appleboy/drone-ssh
-    host: {{ staging_ip_instances[0] }}
+    host: {{ staging_ip_instances.0 }}
     port: 22
     command_timeout: 360
     secrets:
@@ -129,7 +129,7 @@ pipeline:
   deploy_beat_develop:
     group: deploy-service-develop
     image: appleboy/drone-ssh
-    host: {{ staging_ip_instances[0] }}
+    host: {{ staging_ip_instances.0 }}
     port: 22
     command_timeout: 360
     secrets:
@@ -156,7 +156,7 @@ pipeline:
   deploy_flower_develop:
     group: post-deploy-develop
     image: appleboy/drone-ssh
-    host: {{ staging_ip_instances[0] }}
+    host: {{ staging_ip_instances.0 }}
     port: 22
     command_timeout: 360
     secrets:
@@ -265,7 +265,7 @@ pipeline:
   deploy_web:
     group: deploy-service
     image: appleboy/drone-ssh
-    host: {{ production_ip_instances[0] }}
+    host: {{ production_ip_instances.0 }}
     port: 22
     command_timeout: 3600
     secrets:
@@ -293,7 +293,7 @@ pipeline:
   deploy_worker:
     group: deploy-service
     image: appleboy/drone-ssh
-    host: {{ production_ip_instances[0] }}
+    host: {{ production_ip_instances.0 }}
     port: 22
     command_timeout: 3600
     secrets:
@@ -321,7 +321,7 @@ pipeline:
   deploy_beat:
     group: deploy-service
     image: appleboy/drone-ssh
-    host: {{ production_ip_instances[0] }}
+    host: {{ production_ip_instances.0 }}
     port: 22
     command_timeout: 3600
     secrets:
@@ -348,7 +348,7 @@ pipeline:
   deploy_flower:
     group: post-deploy
     image: appleboy/drone-ssh
-    host: {{ production_ip_instances[0] }}
+    host: {{ production_ip_instances.0 }}
     port: 22
     command_timeout: 3600
     secrets:
@@ -414,7 +414,7 @@ pipeline:
 
   scp-environment-develop:
     image: appleboy/drone-scp
-    host: {{ staging_ip_instances[0] }}
+    host: {{ staging_ip_instances.0 }}
     port: 22
     secrets:
       - source: ssh_username
@@ -431,7 +431,7 @@ pipeline:
 
   stack-deploy-swarm-develop:
     image: appleboy/drone-ssh
-    host: {{ staging_ip_instances[0] }}
+    host: {{ staging_ip_instances.0 }}
     port: 22
     command_timeout: 3600
     secrets:
@@ -457,7 +457,7 @@ pipeline:
 
   scp-environment:
     image: appleboy/drone-scp
-    host: {{ production_ip_instances[0] }}
+    host: {{ production_ip_instances.0 }}
     port: 22
     secrets:
       - ssh_username
@@ -472,7 +472,7 @@ pipeline:
 
   stack-deploy-swarm:
     image: appleboy/drone-ssh
-    host: {{ production_ip_instances[0] }}
+    host: {{ production_ip_instances.0 }}
     port: 22
     command_timeout: 360
     secrets:
