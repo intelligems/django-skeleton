@@ -5,7 +5,7 @@ from jinja2 import Environment, FileSystemLoader
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_DIR = os.path.join(PROJECT_DIR, 'config_templates')
-TEMPLATE_FILES = ['{{ project_name }}.tpl.yml', '.drone.tpl.yml']
+TEMPLATE_FILES = ['{{ project_name }}.yml.tpl', '.drone.yml.tpl']
 
 
 def load_config_data(config_source):
