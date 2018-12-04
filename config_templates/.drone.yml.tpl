@@ -512,7 +512,7 @@ pipeline:
       {{/success}}
     when:
       status: [ success, failure ]
-    {% endraw %}
+  {% endraw %}
 
 services:
 

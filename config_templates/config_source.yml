@@ -1,3 +1,5 @@
+project_name: {{ project_name }}
+
 # Swarm stack compose file
 repo_url: aws_id.dkr.ecr.us-east-1.amazonaws.com
 redis_url: redis.staging.elasticache
