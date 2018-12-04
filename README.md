@@ -2,11 +2,13 @@
 
 A Django project template that makes no assumptions but saves you a couple of initial work hours per project.
 
-# General
+## General
+
 This is a project template, which means no naming conventions apply in the project name.
 There are some pre-loaded 3rd-party libraries which we have found are very common in all our applications.
 
 3rd-party apps it includes:
+
 - `celery`, for background jobs processing
 - `django-storages`, to store files in AWS S3 (the most commonly used object storage)
 - `django-anymail`, for transactional emails
@@ -17,14 +19,17 @@ There are some pre-loaded 3rd-party libraries which we have found are very commo
 - `django-extensions`, offering a collection of custom extensions for Django
 - `django-environ`, following the 12-factor methodology
 
-# Prerequisites
+## Prerequisites
+
 - Python3 (Python 3.7 not working yet)
 - Git
 - pip
 - virtualenv (recommended)
 
-# How to use
+## How to use
+
 To start a new project with this template, it's really simple:
+
 ```bash
 django-admin.py startproject \
   --template=https://github.com/intelligems/django-skeleton/zipball/master \
@@ -32,9 +37,11 @@ django-admin.py startproject \
   --name=Procfile \
   <project_name>
 ```
+
 After that just keep doing the configuration you use as a standard in your Django projects.
 
-# Templating
+## Templating
+
 The skeleton has support for template values in `.drone.yml` automation and `swarm stack-deploy compose` yml files.
 
 After the skeleton has been built, you can provide specific configuration values in [config_source.yml](./config_templates/config_source.yml) that will populate the templates and create all necessary files.
@@ -76,13 +83,15 @@ chmod +x bootstrap.sh
 
 > __Warning__ any subsequent call to `bootstrap.sh` or `python -m config_templates.chartmap` will ovewrite auto-generated .yml files from earlier runs.
 
-# Docker and Heroku support
+## Docker and Heroku support
+
 There is built-in docker support. We have added the `Dockerfile` and `docker-compose.yml` file that suits our working set, which of course you may feel free to change and adapt as per your requirements.
 
 As you will see, by default our `.stolos.yml` file is configured to be working with [Stolos.io](https://stolos.io), which is our preferred staging environment provider.
 
 Also, you will find a `Procfile` inside, with just the basic config required to get your project running on Heroku asap.
 
-# Roadmap
+## Roadmap
+
 - Add Heroku deploy button for instant deployments
 - Any ideas? You can contribute!
