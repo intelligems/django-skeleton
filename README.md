@@ -10,6 +10,7 @@ There are some pre-loaded 3rd-party libraries which we have found are very commo
 3rd-party apps it includes:
 
 - `celery`, for background jobs processing
+- `flower`, celery monitoring
 - `django-storages`, to store files in AWS S3 (the most commonly used object storage)
 - `django-anymail`, for transactional emails
 - `djangorestframework`, for your RESTful API
@@ -18,6 +19,13 @@ There are some pre-loaded 3rd-party libraries which we have found are very commo
 - `django-guardian`, for custom object or model level permissions
 - `django-extensions`, offering a collection of custom extensions for Django
 - `django-environ`, following the 12-factor methodology
+- `django-health-check`, for Django health checking
+- `django-pdb`, command line Django debugger
+- `django-storages`, easy integration with storage backends
+- `python-decouple`, safe casting of environment variables to Python types in Django settings.
+- `s3transfer`, `boto3`, integration with AWS S3
+- `fabric`, automation and provisioning
+- `PyYaml`, for auto-generation of yml files and templating
 
 ## Prerequisites
 
