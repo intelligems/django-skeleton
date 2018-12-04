@@ -5,7 +5,7 @@ from jinja2 import Environment, FileSystemLoader
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_DIR = os.path.join(PROJECT_DIR, 'config_templates')
-TEMPLATE_FILES = ['{{ project_name }}.yml.tpl', '.drone.yml.tpl']
+TEMPLATE_FILES = ['{{ project_name }}.yml.j2', '.drone.yml.j2']
 
 
 def load_config_data(config_source):
@@ -27,5 +27,5 @@ if __name__ == '__main__':
         if template_file.startswith('{{ project_name }}'):
             targetdir = os.path.join(PROJECT_DIR, 'swarm')
 
-        with open(os.path.join(targetdir, template_file.replace('.tpl', '')), 'w') as outfile:
+        with open(os.path.join(targetdir, template_file.replace('.j2', '')), 'w') as outfile:
             outfile.write(template.render(config_data))
