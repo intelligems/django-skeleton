@@ -1,0 +1,149 @@
+version: "3.4"
+
+x-common-secrets:
+  &common-secrets
+  - source: swarm_secret_key_v1
+    target: secret_key
+  - source: swarm_database_url_v1
+    target: database_url
+  - source: swarm_admins_v1
+    target: admins
+  - source: swarm_allowed_hosts_v2
+    target: allowed_hosts
+  - source: swarm_allowed_cidr_v1
+    target: allowed_cidr
+  - source: aws_access_key_id_v1
+    target: aws_access_key_id
+  - source: aws_secret_access_key_v1
+    target: aws_secret_access_key
+  - source: aws_storage_bucket_name_v1
+    target: aws_storage_bucket_name
+  - source: aws_s3_custom_domain_v1
+    target: aws_s3_custom_domain
+  - source: aws_s3_region_name_v1
+    target: aws_s3_region_name
+  - source: swarm_sentry_dsn_v1
+    target: sentry_dsn
+
+
+x-common-environment:
+  &common-environment
+  SWARM_MODE: "True"
+  DEBUG: "False"
+  ENVIRONMENT_CHECKS: "production"
+  DRONE_COMMIT_SHORT: ${BUILD_TAG}
+  REDIS_URL: redis://{{ redis_url }}:6379
+  MEMCACHED_HOST: "{{ memcached_url }}"
+  LOGGING_LEVEL: INFO
+
+
+x-common-config:
+  &common-config
+  image: "{{ repo_url }}/{{ project_name }}:latest"
+
+
+x-common-deploy:
+  &common-deploy
+  update_config:
+    parallelism: 1
+    delay: 20s
+    failure_action: rollback
+    order: start-first
+  restart_policy:
+    condition: any
+    delay: 5s
+    window: 20s
+
+
+x-common-deploy-downtime:
+  &common-deploy-downtime
+  update_config:
+    parallelism: 1
+    delay: 20s
+    failure_action: rollback
+    order: start-first
+  restart_policy:
+    condition: any
+    delay: 5s
+    window: 20s
+
+
+secrets:
+  swarm_secret_key_v1:
+    external: true
+  swarm_database_url_v1:
+    external: true
+  swarm_admins_v1:
+    external: true
+  swarm_allowed_hosts_v1:
+    external: true
+  swarm_allowed_cidr_v1:
+    external: true
+  aws_access_key_id_v1:
+    external: true
+  aws_secret_access_key_v1:
+    external: true
+  aws_storage_bucket_name_v1:
+    external: true
+  aws_s3_custom_domain_v1:
+    external: true
+  aws_s3_region_name_v1:
+    external: true
+  swarm_sentry_dsn_v1:
+    external: true
+
+services:
+  web:
+    << : *common-config
+    secrets:
+      << : *common-secrets
+    ports:
+      - 8000:8000
+    environment:
+      << : *common-environment
+      RUN_MIGRATIONS: "1"
+    deploy:
+      replicas: 2
+      << : *common-deploy
+
+  worker:
+    << : *common-config
+    command: celery -A {{ project_name }} worker -l info
+    secrets:
+      << : *common-secrets
+    environment:
+      << : *common-environment
+      RUN_MIGRATIONS: "0"
+      C_FORCE_ROOT: "true"
+    deploy:
+      replicas: 5
+      << : *common-deploy
+
+  beat:
+    << : *common-config
+    command: celery -A {{ project_name }} beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    secrets:
+      << : *common-secrets
+    environment:
+      << : *common-environment
+      RUN_MIGRATIONS: "0"
+      C_FORCE_ROOT: "true"
+    deploy:
+      # Beat service should have only one instance at all times
+      replicas: 1
+      << : *common-deploy-downtime
+
+  flower:
+    << : *common-config
+    command: celery flower -A {{ project_name }} -l info --address=0.0.0.0 --port=5555 --persistent
+    ports:
+      - 5555:5555
+    secrets:
+      << : *common-secrets
+    environment:
+      << : *common-environment
+      RUN_MIGRATIONS: "0"
+      C_FORCE_ROOT: "true"
+    deploy:
+      replicas: 1
+      << : *common-deploy-downtime

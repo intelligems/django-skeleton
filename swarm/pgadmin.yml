@@ -1,0 +1,22 @@
+version: '3.4'
+
+secrets:
+  pgadmin_default_email_v1:
+    external: true
+  pgadmin_default_password_v1:
+    external: true
+
+services:
+  pgadmin:
+    image: intelligems/pgadmin-swarm:latest
+    ports:
+      - 8888:80
+    secrets:
+      - source: pgadmin_default_email_v1
+        target: pgadmin_default_email
+      - source: pgadmin_default_password_v1
+        target: pgadmin_default_password
+    environment:
+      - PGADMIN_SWARM_MODE=1
+    volumes:
+      - "/mnt/efs/pgadmin:/var/lib/pgadmin"

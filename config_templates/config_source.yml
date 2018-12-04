@@ -1,0 +1,21 @@
+project_name: {{ project_name }}
+
+# Swarm stack compose file
+repo_url: aws_id.dkr.ecr.us-east-1.amazonaws.com
+redis_url: redis.staging.elasticache
+memcached_url: memcached.staging.elasticache
+
+# Staging environment drone
+staging_repo_url: aws_id.dkr.ecr.us-east-1.amazonaws.com
+staging_region: us-east-1
+staging_ip_instances:
+  - 35.107.15.1
+  - 35.107.11.2
+
+# Production environment drone
+production_repo_url: aws_id.dkr.ecr.eu-west-1.amazonaws.com
+production_region: eu-west-1
+production_ip_instances:
+  - 35.110.13.1
+  - 35.110.1.2
+  - 35.110.3.24

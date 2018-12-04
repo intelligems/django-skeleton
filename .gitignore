@@ -105,7 +105,15 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# Secrets - env files
+*.env
+*.pub
+environments/
+*.pub
+
+# Project - ide files
 .idea
 .stolos
 db.sqlite3
+.vscode
 

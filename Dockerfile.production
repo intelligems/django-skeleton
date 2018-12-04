@@ -1,0 +1,24 @@
+FROM python:3.6-slim
+LABEL maintainer="dritsas@intelligems.eu"
+
+ENV PYTHONUNBUFFERED=1
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+RUN pip install -U setuptools
+COPY requirements.txt /usr/src/app/
+
+RUN pip install -r requirements.txt
+
+COPY entrypoint.sh entrypoint.sh
+RUN chmod a+x entrypoint.sh
+
+COPY ./ /usr/src/app/
+
+ENTRYPOINT ["bash", "entrypoint.sh"]
+
+EXPOSE 8000
+
+# Gunicorn
+CMD ["gunicorn", "--workers", "3", "--bind", "0.0.0.0:8000", "{{ project_name }}.wsgi"]
