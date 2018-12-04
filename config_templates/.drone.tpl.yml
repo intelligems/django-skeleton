@@ -28,22 +28,20 @@ pipeline:
       event: [ push, pull_request ]
 
 
-  # Change below values: staging_repo_url, production_repo_url, production_ip_machine_1, staging_ip_machine_1, staging_region, production_region
-
-
   #############################################
-  #             Develop Staging                 #
+  #             Develop Staging               #
   #############################################
+
   build-devel:
     image: plugins/ecr
-    repo: staging_repo_url/{{ project_name }}
-    registry: staging_repo_url
+    repo: {{ staging_repo_url }}/{{ project_name }}
+    registry: {{ staging_repo_url }}
     access_key: ${aws_access_key_id}
     secret_key: ${aws_secret_access_key}
     tags:
       - latest
       - ${DRONE_COMMIT:0:8}
-    region: staging_region
+    region: {{ staging_region }}
     dockerfile: Dockerfile.production
     context: .
     secrets:
@@ -58,9 +56,9 @@ pipeline:
     group: login-develop
     image: appleboy/drone-ssh
     host:
-      - staging_ip_machine_1
-      - staging_ip_machine_2
-      - staging_ip_machine_3
+      {% for ip_instance in staging_ip_instances %}
+      - {{ ip_instance }}
+      {% endfor %}
     port: 22
     command_timeout: 360
     secrets:
@@ -77,7 +75,7 @@ pipeline:
   deploy_web_develop:
     group: deploy-service-develop
     image: appleboy/drone-ssh
-    host: staging_ip_machine_1
+    host: {{ staging_ip_instances[0] }}
     port: 22
     command_timeout: 360
     secrets:
@@ -94,7 +92,7 @@ pipeline:
         --restart-condition on-failure
         --restart-max-attempts 2
         --update-failure-action rollback
-        --image staging_repo_url/{{ project_name }}:${DRONE_COMMIT:0:8}
+        --image {{ staging_repo_url }}/{{ project_name }}:${DRONE_COMMIT:0:8}
         {{project_name}}_web
     when:
       branch: develop
@@ -104,7 +102,7 @@ pipeline:
   deploy_worker_develop:
     group: deploy-service-develop
     image: appleboy/drone-ssh
-    host: staging_ip_machine_1
+    host: {{ staging_ip_instances[0] }}
     port: 22
     command_timeout: 360
     secrets:
@@ -121,7 +119,7 @@ pipeline:
         --restart-condition on-failure
         --restart-max-attempts 2
         --update-failure-action rollback
-        --image staging_repo_url/{{ project_name }}:${DRONE_COMMIT:0:8}
+        --image {{ staging_repo_url }}/{{ project_name }}:${DRONE_COMMIT:0:8}
         {{project_name}}_worker
     when:
       branch: develop
@@ -131,7 +129,7 @@ pipeline:
   deploy_beat_develop:
     group: deploy-service-develop
     image: appleboy/drone-ssh
-    host: staging_ip_machine_1
+    host: {{ staging_ip_instances[0] }}
     port: 22
     command_timeout: 360
     secrets:
@@ -148,7 +146,7 @@ pipeline:
         --restart-condition on-failure
         --restart-max-attempts 2
         --update-failure-action rollback
-        --image staging_repo_url/{{ project_name }}:${DRONE_COMMIT:0:8}
+        --image {{ staging_repo_url }}/{{ project_name }}:${DRONE_COMMIT:0:8}
         {{ project_name }}_beat
     when:
       branch: develop
@@ -158,7 +156,7 @@ pipeline:
   deploy_flower_develop:
     group: post-deploy-develop
     image: appleboy/drone-ssh
-    host: staging_ip_machine_1
+    host: {{ staging_ip_instances[0] }}
     port: 22
     command_timeout: 360
     secrets:
@@ -175,7 +173,7 @@ pipeline:
         --restart-condition on-failure
         --restart-max-attempts 2
         --update-failure-action rollback
-        --image staging_repo_url/{{ project_name }}:${DRONE_COMMIT:0:8}
+        --image {{ staging_repo_url }}/{{ project_name }}:${DRONE_COMMIT:0:8}
         {{ project_name }}_flower
     when:
       branch: develop
@@ -185,9 +183,9 @@ pipeline:
     group: post-deploy-develop
     image: appleboy/drone-ssh
     host:
-      - staging_ip_machine_1
-      - staging_ip_machine_2
-      - staging_ip_machine_3
+      {% for ip_instance in staging_ip_instances %}
+      - {{ ip_instance }}
+      {% endfor %}
     command_timeout: 360
     secrets:
       - source: ssh_username
@@ -205,9 +203,9 @@ pipeline:
     group: post-deploy-develop
     image: appleboy/drone-ssh
     host:
-      - staging_ip_machine_1
-      - staging_ip_machine_2
-      - staging_ip_machine_3
+      {% for ip_instance in staging_ip_instances %}
+      - {{ ip_instance }}
+      {% endfor %}
     command_timeout: 360
     secrets:
       - source: ssh_username
@@ -220,19 +218,21 @@ pipeline:
       branch: develop
       event: push
 
+
   #############################################
   #             Master Production             #
   #############################################
+
   build:
     image: plugins/ecr
-    repo: production_repo_url/{{ project_name }}
-    registry: production_repo_url
+    repo: {{ production_repo_url }}/{{ project_name }}
+    registry: {{ production_repo_url }}
     access_key: ${aws_access_key_id}
     secret_key: ${aws_secret_access_key}
     tags:
       - latest
       - ${DRONE_COMMIT:0:8}
-    region: production_region
+    region: {{ production_region }}
     dockerfile: Dockerfile.production
     context: .
     secrets:
@@ -248,9 +248,9 @@ pipeline:
     group: login
     image: appleboy/drone-ssh
     host:
-      - production_ip_machine_1
-      - production_ip_machine_2
-      - production_ip_machine_3
+      {% for ip_instance in production_ip_instances %}
+      - {{ ip_instance }}
+      {% endfor %}
     port: 22
     command_timeout: 360
     secrets:
@@ -265,7 +265,7 @@ pipeline:
   deploy_web:
     group: deploy-service
     image: appleboy/drone-ssh
-    host: production_ip_machine_1
+    host: {{ production_ip_instances[0] }}
     port: 22
     command_timeout: 3600
     secrets:
@@ -282,7 +282,7 @@ pipeline:
         --restart-condition on-failure
         --restart-max-attempts 2
         --update-failure-action rollback
-        --image production_repo_url/{{ project_name }}:${DRONE_COMMIT:0:8}
+        --image {{ production_repo_url }}/{{ project_name }}:${DRONE_COMMIT:0:8}
         --env-add DRONE_COMMIT_SHORT=${DRONE_COMMIT:0:8}
         {{ project_name }}_web
     when:
@@ -293,7 +293,7 @@ pipeline:
   deploy_worker:
     group: deploy-service
     image: appleboy/drone-ssh
-    host: production_ip_machine_1
+    host: {{ production_ip_instances[0] }}
     port: 22
     command_timeout: 3600
     secrets:
@@ -310,7 +310,7 @@ pipeline:
         --restart-condition on-failure
         --restart-max-attempts 2
         --update-failure-action rollback
-        --image production_repo_url/{{ project_name }}:${DRONE_COMMIT:0:8}
+        --image {{ production_repo_url }}/{{ project_name }}:${DRONE_COMMIT:0:8}
         --env-add DRONE_COMMIT_SHORT=${DRONE_COMMIT:0:8}
         {{ project_name }}_worker
     when:
@@ -321,7 +321,7 @@ pipeline:
   deploy_beat:
     group: deploy-service
     image: appleboy/drone-ssh
-    host: production_ip_machine_1
+    host: {{ production_ip_instances[0] }}
     port: 22
     command_timeout: 3600
     secrets:
@@ -338,7 +338,7 @@ pipeline:
         --restart-condition on-failure
         --restart-max-attempts 2
         --update-failure-action rollback
-        --image production_repo_url/{{ project_name }}:${DRONE_COMMIT:0:8}
+        --image {{ production_repo_url }}/{{ project_name }}:${DRONE_COMMIT:0:8}
         --env-add DRONE_COMMIT_SHORT=${DRONE_COMMIT:0:8}
         {{ project_name }}_beat
     when:
@@ -348,7 +348,7 @@ pipeline:
   deploy_flower:
     group: post-deploy
     image: appleboy/drone-ssh
-    host: production_ip_machine_1
+    host: {{ production_ip_instances[0] }}
     port: 22
     command_timeout: 3600
     secrets:
@@ -365,7 +365,7 @@ pipeline:
         --restart-condition on-failure
         --restart-max-attempts 2
         --update-failure-action rollback
-        --image production_repo_url/{{ project_name }}:${DRONE_COMMIT:0:8}
+        --image {{ production_repo_url }}/{{ project_name }}:${DRONE_COMMIT:0:8}
         --env-add DRONE_COMMIT_SHORT=${DRONE_COMMIT:0:8}
         {{ project_name }}_flower
     when:
@@ -376,9 +376,9 @@ pipeline:
     group: post-deploy
     image: appleboy/drone-ssh
     host:
-      - production_ip_machine_1
-      - production_ip_machine_2
-      - production_ip_machine_3
+      {% for ip_instance in production_ip_instances %}
+      - {{ ip_instance }}
+      {% endfor %}
     command_timeout: 360
     secrets:
       - ssh_username
@@ -394,9 +394,9 @@ pipeline:
     group: post-deploy
     image: appleboy/drone-ssh
     host:
-      - production_ip_machine_1
-      - production_ip_machine_2
-      - production_ip_machine_3
+      {% for ip_instance in production_ip_instances %}
+      - {{ ip_instance }}
+      {% endfor %}
     command_timeout: 360
     secrets:
       - ssh_username
@@ -411,9 +411,10 @@ pipeline:
   ######################################################
   # Docker Stack deploy for all thor services develop  #
   ######################################################
+
   scp-environment-develop:
     image: appleboy/drone-scp
-    host: staging_ip_machine_1
+    host: {{ staging_ip_instances[0] }}
     port: 22
     secrets:
       - source: ssh_username
@@ -430,7 +431,7 @@ pipeline:
 
   stack-deploy-swarm-develop:
     image: appleboy/drone-ssh
-    host: staging_ip_machine_1
+    host: {{ staging_ip_instances[0] }}
     port: 22
     command_timeout: 3600
     secrets:
@@ -445,6 +446,7 @@ pipeline:
       branch: develop
       event: deployment
       environment: staging
+
   #############################################
   # Docker Stack deploy End                   #
   #############################################
@@ -452,9 +454,10 @@ pipeline:
   ####################################################
   # Docker Stack deploy for all thor services master #
   ####################################################
+
   scp-environment:
     image: appleboy/drone-scp
-    host: production_ip_machine_1
+    host: {{ production_ip_instances[0] }}
     port: 22
     secrets:
       - ssh_username
@@ -469,7 +472,7 @@ pipeline:
 
   stack-deploy-swarm:
     image: appleboy/drone-ssh
-    host: production_ip_machine_1
+    host: {{ production_ip_instances[0] }}
     port: 22
     command_timeout: 360
     secrets:
@@ -482,10 +485,12 @@ pipeline:
       branch: [ master ]
       event: deployment
       environment: production
+
   #############################################
   # Docker Stack deploy End                   #
   #############################################
 
+  {% raw %}
   slack:
     image: plugins/slack
     secrets:
@@ -507,6 +512,7 @@ pipeline:
       {{/success}}
     when:
       status: [ success, failure ]
+    {% endraw %}
 
 services:
 

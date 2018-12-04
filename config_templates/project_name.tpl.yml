@@ -25,21 +25,22 @@ x-common-secrets:
   - source: swarm_sentry_dsn_v1
     target: sentry_dsn
 
-# TODO: Change redis_url, memcached_url host to real endpoint values
+
 x-common-environment:
   &common-environment
   SWARM_MODE: "True"
   DEBUG: "False"
   ENVIRONMENT_CHECKS: "production"
   DRONE_COMMIT_SHORT: ${BUILD_TAG}
-  REDIS_URL: redis://redis_url:6379
-  MEMCACHED_HOST: "memcached_url"
+  REDIS_URL: redis://{{ redis_url }}:6379
+  MEMCACHED_HOST: "{{ memcached_url }}"
   LOGGING_LEVEL: INFO
 
-# TODO: Change repository to name to private registry
+
 x-common-config:
   &common-config
-  image: repo_url/{{ project_name }}:latest
+  image: "{{ repo_url }}/{{ project_name }}:latest"
+
 
 x-common-deploy:
   &common-deploy
@@ -53,6 +54,7 @@ x-common-deploy:
     delay: 5s
     window: 20s
 
+
 x-common-deploy-downtime:
   &common-deploy-downtime
   update_config:
@@ -64,6 +66,7 @@ x-common-deploy-downtime:
     condition: any
     delay: 5s
     window: 20s
+
 
 secrets:
   swarm_secret_key_v1:
