@@ -2,6 +2,8 @@
 
 A Django project template that makes no assumptions but saves you a couple of initial work hours per project.
 
+> __Note:__ Since `pipenv` is gaining traction in the Python community we offer support for both `requirements.txt` and `pipenv` workflows. [Master](https://github.com/intelligems/django-skeleton/tree/master) branch will support `requirements.txt` workflow, but you can find support for `pipenv` package management workflow and compatible Dockerfiles in branch: [pipenv](https://github.com/intelligems/django-skeleton/tree/pipenv)
+
 ## General
 
 This is a project template, which means no naming conventions apply in the project name.
@@ -32,6 +34,7 @@ There are some pre-loaded 3rd-party libraries which we have found are very commo
 - Python3 (Python 3.7 not working yet)
 - Git
 - pip
+- pipenv
 - virtualenv (recommended)
 
 ## How to use
