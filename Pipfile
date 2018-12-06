@@ -3,6 +3,13 @@ name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
 
+# Use below snippet to add support for private pypi repositories
+
+# [[source]]
+# name = "pypi_internal"
+# url = "http://pypi.intelligems.eu/simple"
+# verify_ssl = false
+
 [dev-packages]
 django-pdb = "*"
 fabric = "*"
