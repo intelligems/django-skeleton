@@ -103,6 +103,5 @@ As you will see, by default our `.stolos.yml` file is configured to be working w
 Also, you will find a `Procfile` inside, with just the basic config required to get your project running on Heroku asap.
 
 ## Roadmap
-
-- Add Heroku deploy button for instant deployments
+- Add basic Drone CI config file
 - Any ideas? You can contribute!
