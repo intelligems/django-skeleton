@@ -44,7 +44,7 @@ To start a new project with this template, it's really simple:
 ```bash
 django-admin.py startproject \
   --template=https://github.com/intelligems/django-skeleton/zipball/pipenv \
-  --extension=py,rst,yml,sh \
+  --extension=py,rst,yml,sh,production \
   --name=Procfile \
   <project_name>
 ```
