@@ -49,6 +49,7 @@ django-admin.py startproject \
 ```
 
 After that just keep doing the configuration you use as a standard in your Django projects.
+The `modules` directory is intended to gather your django apps, so that you keep a clean and simple project structure.
 
 ## Templating
 
