@@ -24,12 +24,12 @@ class UserViewSet(mixins.ListModelMixin,
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def me(self, request, *args, **kwargs):
-        return Response(self.serializer_class(instance=self.get_object()).data)
+        return Response(self.serializer_class(instance=request.user).data)
 
     @action(detail=False, methods=['put'], serializer_class=PasswordSerializer)
-    def set_password(self, request):
+    def set_password(self, request, *args, **kwargs):
         serializer = PasswordSerializer(data=request.data)
-        user = self.get_object()
+        user = self.request.user
 
         if serializer.is_valid():
             if not user.check_password(serializer.data.get('old_password')):
