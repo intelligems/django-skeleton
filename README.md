@@ -105,3 +105,63 @@ Also, you will find a `Procfile` inside, with just the basic config required to 
 ## Roadmap
 - Add basic Drone CI config file
 - Any ideas? You can contribute!
+
+
+## How to Build Documentation with Sphinx
+
+- Create a `docs` folder and answer the `sphinx-quickstart`'s setup questions to initialize the documentation folder:
+
+      $ mkdir docs
+      $ cd docs
+      $ sphinx-quickstart
+       
+   Most of the questions have recommended answers that will do for most cases. Simply fill in the project name, 
+   author etc., as asked.
+   
+- The process will create inside the `docs` folder some sub-folders and some configuration files. We need to do the 
+following inside `docs` to be set to go:
+
+      $ mkdir source/this_project
+
+  Then in an editor open the `source/conf.py` file and add the following:
+  
+  1. On the `Path Setup` section add:
+  
+         import os
+         import sys
+         import django
+         
+         sys.path.insert(0, os.path.abspath('../..'))
+         os.environ['DJANGO_SETTINGS_MODULE'] = 'this_project.settings'
+         django.setup()
+
+  2. If we want to use the `autodoc` extension to create docs from docstrings automatically then we add the following
+   to the `extensions` list:
+   
+         extensions = ['sphinx.ext.autodoc', ...]
+         
+     If we use `autodoc` we need also to add the following in the `exclude_patterns` in order to avoid seeing 
+     migrations, urls etc on the documentation:
+     
+         exclude_patterns = [
+             "**/*.migrations*",
+             "**/*.admin*",
+             "**/*.apps*",
+             "**/*.tests*",
+             "**/*.urls*",
+         ]
+         
+   3. To use the RTD Theme (it is already installed via `pip`) we need to modify the `html_theme` as follows:
+   
+          html_theme = "sphinx_rtd_theme"
+          
+- To generate documentation from docstrings we need to execute the following:
+
+      $ cd docs
+      $ sphinx-apidoc -fMe -o source/your_project/ ..
+      $ make clean && make html
+      
+  The `.rst` results will be located inside `source/your_project` and the `.html` files will be inside the 
+  `docs/build` folder.
+  
+- To create custom documentation we will need to follow the official `Sphinx` documentation.
