@@ -4,6 +4,9 @@ A Django project template that makes no assumptions but saves you a couple of in
 
 > __Note:__ Since `pipenv` is gaining traction in the Python community we offer support for both `requirements.txt` and `pipenv` workflows. [Master](https://github.com/intelligems/django-skeleton/tree/master) branch will support `requirements.txt` workflow, but you can find support for `pipenv` package management workflow and compatible Dockerfiles in branch: [pipenv](https://github.com/intelligems/django-skeleton/tree/pipenv)
 
+# Repository unmaintained
+As Intelligems has stopped operations since Aug19, this repository remains unmaintained. Whoever may be interested to keep it up-to-date or extend it, DM [koslib](twitter.com/koslib) to arrange project transfer.
+
 ## General
 
 This is a project template, which means no naming conventions apply in the project name.
