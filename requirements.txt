@@ -49,7 +49,7 @@ python-crontab==2.3.5
 python-dateutil==2.7.5
 python-decouple==3.1
 pytz==2018.7
-PyYAML==4.2b1
+PyYAML==5.4
 redis==2.10.6
 requests==2.20.1
 s3transfer==0.1.13
